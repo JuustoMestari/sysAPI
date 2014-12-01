@@ -2,6 +2,8 @@
 
 ### Requirements
 
+It has only been tested on Debian 7.0 x64 for now.
+
 These packages are required
 
 * build-essential
