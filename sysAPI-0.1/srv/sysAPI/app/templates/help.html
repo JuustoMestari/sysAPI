@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% set active_page = "help" %}
+{% block content %}
+<div class="starter-template">
+        <h1>Help</h1>
+        <p class="lead">This page contains configuration, authentication info and tips.</p>
+        <br/>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">sysAPI</h3>
+                  </div>
+                  <div class="panel-body text-left">
+                    sysAPI is coded using python and the <a href="http://flask.pocoo.org/" target="_blank">flask framework</a>.
+                    All the python and template files are located in <samp>/srv/sysAPI/app</samp> and can be modified as you wish.
+                    You can also add your own functions by taking <samp>ls</samp> as an example.<br/>
+                    During the installation, a <a href="http://virtualenv.readthedocs.org/en/latest/" target="_blank">virtual environment</a>
+                       has been created in <samp>/srv/sysAPI/env</samp>. You can use it to install extra packages you might need.<br/>
+                    To uninstall the package, run <kbd># dpkg -r sysAPI</kbd>.<br/>
+                      If you want to implement your own functions, the best way is to take a look at <samp>app/__init__.py</samp> to create
+                      a proper route and <samp>app/cmd_ls.py</samp> for a complete example.
+                  </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">Errors</h3>
+                  </div>
+                  <div class="panel-body text-left">
+                    HTTP status codes for errors are : <br/><br/>
+                      <dl class="dl-horizontal">
+                          <dt>400</dt>
+                          <dd>Global error</dd>
+                          <dt>403</dt>
+                          <dd>Forbidden</dd>
+                          <dt>404</dt>
+                          <dd>Not found</dd>
+                      </dl>
+
+                    <pre>
+    {
+        "description": "Authentication Failed!",
+        "error": "Authentication"
+    }</pre>
+                  </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="panel panel-default">
+                          <div class="panel-heading">
+                            <h3 class="panel-title">Daemon</h3>
+                          </div>
+                          <div class="panel-body text-left">
+                            A daemon named <i>sysAPI</i> has been created during the installation.
+                            You can start, stop and restart it as any other service.
+                            Restart the daemon after any modification made to the <i>.py</i> files !<br/>
+                              <kbd># service sysAPI start/stop/restart</kbd>
+
+
+                          </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                         <div class="panel panel-default">
+                          <div class="panel-heading">
+                            <h3 class="panel-title">WebServer</h3>
+                          </div>
+                          <div class="panel-body text-left">
+                            The webserver port and listening interface can be changed by modifying the last line
+                              of <samp>app/__init__.py</samp> . The default port is <samp>8888</samp> .<br/>
+                            It is also possible to run a <a href="http://flask.pocoo.org/snippets/111/" target="_blank">secure webserver</a> (haven't tried it yet, though).
+                          </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+             <div class="col-md-12">
+                 <div class="panel panel-default">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">Authentication</h3>
+                  </div>
+                  <div class="panel-body text-left">
+                    The authentication system is similar to <a hfref="http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html" target="_blank">Amazon API auth</a>.
+                    It uses a secret key and an access key to create an <a href="http://en.wikipedia.org/wiki/Hash-based_message_authentication_code" target="_blank">HMAC</a>-SHA1.<br/>
+                    After the installation process, a keypair has been created for you in <samp>authfile.conf</samp> . Each key is 32bytes and separated by <b>#</b>.<br/>
+                    You can add your own keys (secretKey#accessKey) or you can use <kbd># python genKeyPair.py</kbd> in <samp>/srv/sysAPI/</samp> to generate and add it to <samp>authfile.conf</samp> for you.<br/><br/>
+                    Each function requires authentication. If you add your own functions, make sure to add the <i>@requires_auth</i> decorator in front of it (see <samp>app/__init__.py</samp>).
+                    Request Headers must contains 2 attributes :
+                      <br/><dl class="dl-horizontal">
+                          <dt>Authorization</dt>
+                          <dd>accessKey:signature</dd>
+                          <dt>X-Date</dt>
+                          <dd>Unix timestamp</dd>
+                      </dl>
+                   The signature is calculated using the secretkey, HTTP Method, the API URI and the timestamp (to make sure it generates a new signature every time). The access key is used to hash the message.<br/>
+                   <br/>Simple example using jquery and the <a href="https://code.google.com/p/crypto-js/" target="_blank">Crypto-js</a> library :
+                      <pre>
+$(function()
+{
+    var APIURI = "http://ip.address.here:8888/ls/home/admin/";
+
+    var secretKey   =   "pAMrziaxVFgFRiKOshxfAKynDDSUIRiv";
+    var accessKey   =   "xNnXAIWtNclKLPrUGjoFaOnHUHgVeeGC";
+
+    var thetime     =   Date.now();
+    var message     =   "GET "+APIURI+"\n"+String(thetime);
+    var signature   =   CryptoJS.HmacSHA1(message+secretKey,accessKey);
+    signature       =   signature.toString(CryptoJS.enc.Base64);
+
+    $.ajax({
+        url: APIURI,
+        type: 'GET',
+        headers: {
+            "X-Date"        :   thetime,
+            "Authorization" :   accessKey+':'+signature
+            },
+        error:
+            function(response) {
+                console.log(response);
+            },
+        success:
+            function(data) {
+                console.log(data);
+            }
+    });
+});
+                      </pre>
+                      Note the <b>'\n'</b> between the APIUri and the timestamp. If you want to change the hash function, modify <i>isAuth</i> in <samp>app/helpers.py</samp>.<br/>
+                      More information on the <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/images/HMACAuthProcess_You.png" target="_blank">client side</a> and on
+                      the <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/images/HMACAuthProcess_AWS.png" target="_blank">server side</a>.
+                  </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                 <div class="panel panel-default">
+                      <div class="panel-heading">
+                        <h3 class="panel-title">Blacklist / Whitelist</h3>
+                      </div>
+                      <div class="panel-body text-left">
+                       Some functions use blacklist and whitelist files (<samp>ls</samp> for example). If the path is in the blacklist, an error is returned.
+                       If the path is <b>not</b> in the whitelist, an error is returned.<br/>
+                       You can specify :
+                          <dl class="dl-horizontal">
+                              <dt>Directory path</dt>
+                              <dd>/home/admin/</dd>
+                              <dt>File path</dt>
+                              <dd>/home/admin/.bashrc</dd>
+                              <dt>Wildcard path</dt>
+                              <dd>/home/*</dd>
+                          </dl>
+                       By default, the whitelist file contains <samp>/*</samp> meaning all files not in the blacklist are allowed.<br/>
+                       It is possible to create different files for each function. Make sure you pass the right file to the function <i>isinlist</i> in <samp>app/helpers.py</samp>.
+                      </div>
+                    </div>
+            </div>
+             <div class="col-md-6">
+                 <div class="panel panel-default">
+                      <div class="panel-heading">
+                        <h3 class="panel-title">Test API ( <samp> {{ apiURI }}test</samp> )</h3>
+                      </div>
+                      <div class="panel-body text-left">
+                        <form class="form-horizontal">
+                          <div class="form-group">
+                            <label for="secretKey" class="col-sm-3 control-label">Secret Key</label>
+                            <div class="col-sm-9">
+                              <input type="password" class="form-control" id="secretKey" placeholder="Secret Key">
+                            </div>
+                          </div>
+                          <div class="form-group">
+                            <label for="accessKey" class="col-sm-3 control-label">Access Key</label>
+                            <div class="col-sm-9">
+                              <input type="password" class="form-control" id="accessKey" placeholder="Access Key">
+                            </div>
+                          </div>
+
+                          <div class="form-group">
+                            <div class="col-sm-offset-3 col-sm-9">
+                              <a id="btnTest" class="btn btn-default">Test</a>
+                            </div>
+                          </div>
+                            <div class="form-group">
+                                <div class="col-sm-12" id="testResult">
+                                </div>
+                            </div>
+                            <input type="hidden" id="apiURI" value="{{ apiURI }}"/>
+                        </form>
+                      </div>
+                    </div>
+            </div>
+        </div>
+</div>
+{% endblock %}
