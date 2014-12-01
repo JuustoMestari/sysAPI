@@ -3,6 +3,7 @@ from functools import wraps
 from crossdomain import crossdomain
 from cmd_ls import *
 from cmd_cat import *
+from cmd_uptime import *
 from helpers import isauth
 from httpError import httperror
 
@@ -34,6 +35,13 @@ def main_cmd_ls(fullpath):
 @requires_auth
 def main_cmd_cat(fullpath):
     return cmd_cat(fullpath)
+
+@app.route("/uptime", methods=['GET', 'OPTIONS'])
+@app.route("/uptime/", methods=['GET', 'OPTIONS'])
+@crossdomain(origin='*')
+@requires_auth
+def main_cmd_uptime():
+    return cmd_uptime()
 
 @app.route("/test", methods=['GET', 'OPTIONS'])
 @crossdomain(origin='*')
