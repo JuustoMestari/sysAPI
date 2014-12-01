@@ -1,5 +1,15 @@
 # sysAPI v0.1
 
+### What is it?
+
+sysAPI is a Python (using [Flask] framework) based API for Linux systems. The package creates a small webserver that runs as a service.
+
+Available API methods (v0.1)
+
+*/ls/ - Get a list files for a specific directory
+*/cat/ - Get file content
+*/uptime/ - Get uptime
+
 ### Requirements
 
 It has only been tested on Debian 7.0 x64 for now.
@@ -62,3 +72,5 @@ $ dpkg -r sysAPI-x.x
 ### To Do
 
 * Add more features and commands
+
+[Flask]:http://flask.pocoo.org/
