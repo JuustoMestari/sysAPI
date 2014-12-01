@@ -6,9 +6,9 @@ sysAPI is a Python (using [Flask] framework) based API for Linux systems. The pa
 
 Available API methods (v0.1)
 
-*/ls/ - Get a list files for a specific directory
-*/cat/ - Get file content
-*/uptime/ - Get uptime
+* /ls/ - Get a list files for a specific directory
+* /cat/ - Get file content
+* /uptime/ - Get uptime
 
 ### Requirements
 
