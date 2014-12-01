@@ -1,9 +1,0 @@
-Package: sysAPI
-Version: 1.0-1
-Section: base
-Priority: optional
-Pre-Depends: python-pip
-Architecture: all
-Essential: no
-Maintainer: David Davenne <david@davenne.be>
-Description: create system API
