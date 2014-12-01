@@ -58,3 +58,7 @@ $ python genKeyPair.py
 ```sh
 $ dpkg -r sysAPI-x.x
 ```
+
+### To Do
+
+* Add more features and commands
